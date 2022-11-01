@@ -15,7 +15,9 @@ exports.handler = async (event) => {
     return response;
 };
 
+/* Uncomment Below for Testing */
+/*
 const input = `
 for(int i = 0; i < n; i+=2) {for(int i = 0; i < n; i+=2) {}}
 `
-console.log(getSourceCodeBigO(input));
+console.log(getSourceCodeBigO(input)); */
