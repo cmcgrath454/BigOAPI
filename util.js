@@ -1,4 +1,4 @@
-export function getLeafNodes(ctx) {
+function getLeafNodes(ctx) {
     const nodes = [];
     recursiveGetLeafNodes(ctx, nodes);
     return nodes;
@@ -20,7 +20,7 @@ function recursiveGetLeafNodes(ctx, arr) {
     })
 }
 
-export function mapTree(tree, fnc) {
+function mapTree(tree, fnc) {
     tree.forEach(stmt => {
         fnc(stmt);
         if (stmt.childStmts.length > 0) {
@@ -28,3 +28,6 @@ export function mapTree(tree, fnc) {
         }
     })
 }
+
+exports.getLeafNodes = getLeafNodes;
+exports.mapTree = mapTree;
