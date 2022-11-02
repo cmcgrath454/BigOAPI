@@ -79,17 +79,22 @@ function getForLoopBigO(stmt) {
     switch (updateOperator) {
         case '++':
         case '+=':
-            if (termOperator.includes('<'))
+            if (termOperator.includes('<') || termOperator.includes("!="))
                 return (1);
+            else
+                return 0;
         case '--':
         case '-=':
-            break;
+            if ((termOperator.includes('>') || termOperator.includes("!=")) && termOperand2 == 'n')
+                return (1);
+            else
+                return 0;
         case '*=':
-            break;
+            throw("Unsupported update operator");
         case '/=':
-            break;
+            throw("Unsupported update operator");
         case '%=':
-            break;
+            throw("Unsupported update operator");
         default:
             throw ("Update operator unsupported" + updateOperator);
     }
