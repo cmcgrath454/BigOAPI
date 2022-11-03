@@ -18,9 +18,7 @@ exports.handler = async (event) => {
 /* Uncomment Below for Testing */
 
 const input = `
-while (x < n) {
-    x++;
-}
+for (int i = n; i > 0; i--) {}
 `
 
 var javaCode = undefined;

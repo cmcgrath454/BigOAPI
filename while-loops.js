@@ -33,13 +33,15 @@ function getWhileLoopBigO(stmt) {
     if (termOperand1 != 'n' && termOperand2 != 'n') // TODO: If no n, find if n was assigned to variable used in terminator
         return 0;
 
-    // Move n to rhs for normalized analysis 
+    // Moves n to rhs for normalized analysis 
     if (termOperand1 == 'n') {
         termOperand1 = termOperand2;
         termOperand2 = 'n';
         if (termOperator.includes('>')) termOperator = termOperator.replace('>', '<');
         else if (termOperator.includes('<')) termOperator = termOperator.replace('<', '>');
     }
+
+    // TODO: Check for more than just first match
 
     if (whileLoop.match(buildRegex(termOperand1, '++'))) {
         return 1;
@@ -54,10 +56,11 @@ function buildRegex(variable, operator) {
             findStr += '\\W*\\+\\+\\W*';
             break;
     }
+    // TODO: Build out all possible operators
 
     findStr += ';'
     console.log(findStr);
-    return new RegExp(findStr, 'g');
+    return new RegExp(findStr);
 }
 
 exports.getWhileLoops = getWhileLoops;

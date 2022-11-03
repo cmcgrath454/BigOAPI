@@ -18,11 +18,12 @@ function getSourceCodeBigO(input) {
 }
 
 function findLargestBigO(tree) {
+  bigOList = [];
   mapTree(tree, bigOs);
   return Math.max(...bigOList);
 }
 
-var bigOList = [];
+var bigOList;
 
 function bigOs(stmt) {
   bigOList.push(stmt.bigO);

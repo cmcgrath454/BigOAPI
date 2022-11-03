@@ -54,7 +54,12 @@ function getForLoopBigO(stmt) {
             var [, { Identifier: initVar }, , { Identifier: initVal }] = stmt.init;
 
     // Destructure Terminator
-    let [{ Identifier: termOperand1 }, { Identifier: termOperand2 }, { BinaryOperator: termOperator }] = stmt.expr;
+    let termOperand1, termOperand2, termOperator;
+    [{ Identifier: termOperand1 }, { Identifier: termOperand2 }, { BinaryOperator: termOperator }] = stmt.expr;
+    if (!termOperand1)
+        [{ DecimalLiteral: termOperand1 }, ,] = stmt.expr;
+    if (!termOperand2)
+        [, { DecimalLiteral: termOperand2 }, ] = stmt.expr;
 
     // Destructure Updater
     if (stmt.update.length == 2)
@@ -85,16 +90,16 @@ function getForLoopBigO(stmt) {
                 return 0;
         case '--':
         case '-=':
-            if ((termOperator.includes('>') || termOperator.includes("!=")) && termOperand2 == 'n')
+            if ((termOperator.includes('>') || termOperator.includes("!=")) && !isNaN(termOperand2))
                 return (1);
             else
                 return 0;
         case '*=':
-            throw("Unsupported update operator");
+            throw ("Unsupported update operator");
         case '/=':
-            throw("Unsupported update operator");
+            throw ("Unsupported update operator");
         case '%=':
-            throw("Unsupported update operator");
+            throw ("Unsupported update operator");
         default:
             throw ("Update operator unsupported" + updateOperator);
     }
