@@ -1,9 +1,10 @@
-const { getForLoopBigO }  = require("./for-loops.js");
+const { getForLoopBigO }  = require("./for-loops");
+const { getWhileLoopBigO } = require("./while-loops")
 const { parseCodeToTree }  = require("./parse-code");
 const { mapTree }  = require("./util");
 
 function getSourceCodeBigO(input) {
-  let javaCode = 'public class DummyClass{ public static void main(String args[]) {' + input + '}}';
+  javaCode = 'public class DummyClass{ public static void main(String args[]) {' + input + '}}';
 
   const stmtTree = parseCodeToTree(javaCode);
 
@@ -34,8 +35,7 @@ function addStmtBigO(stmt) {
       bigO = getForLoopBigO(stmt);
       break;
     case 'whileLoop':
-      bigO = 0;
-      // TODO: Add BigO Function
+      bigO = getWhileLoopBigO(stmt);
       break;
     case 'ifStmt':
       bigO = 0;
@@ -53,4 +53,4 @@ function addStmtBigO(stmt) {
   }
 }
 
-exports.getSourceCodeBigO = getSourceCodeBigO;
+module.exports = getSourceCodeBigO;

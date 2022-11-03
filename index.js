@@ -1,4 +1,4 @@
-const { getSourceCodeBigO } = require("./analyze");
+const getSourceCodeBigO = require('./analyze');
 
 exports.handler = async (event) => {
     const json = JSON.parse(event.body);
@@ -16,8 +16,13 @@ exports.handler = async (event) => {
 };
 
 /* Uncomment Below for Testing */
-/*
+
 const input = `
-for(int i = 0; i < n; i+=2) {for(int i = 0; i < n; i+=2) {}}
+while (x < n) {
+    x++;
+}
 `
-console.log(getSourceCodeBigO(input)); */
+
+var javaCode = undefined;
+
+console.log(getSourceCodeBigO(input));
