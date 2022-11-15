@@ -53,7 +53,7 @@ class ForLoopCollector extends BaseJavaCstVisitorWithDefaults {
         const forLoop = {
             type: 'forLoop',
             init: ctx.hasOwnProperty('forInit') ? getLeafNodes(ctx.forInit[0].children) : null,
-            expr: ctx.hasOwnProperty('expression') ? getLeafNodes(ctx.expression[0].children) : null,
+            terminate: ctx.hasOwnProperty('expression') ? getLeafNodes(ctx.expression[0].children) : null,
             update: ctx.hasOwnProperty('forUpdate') ? getLeafNodes(ctx.forUpdate[0].children) : null,
             blockCst: ctx.hasOwnProperty('statement') ? ctx.statement[0] : null
         };
@@ -71,7 +71,7 @@ class WhileLoopCollector extends BaseJavaCstVisitorWithDefaults {
   whileStatement(ctx) {
       const whileLoop = {
           type: 'whileLoop',
-          expr: ctx.hasOwnProperty('expression') ? getLeafNodes(ctx.expression[0].children) : null,
+          terminate: ctx.hasOwnProperty('expression') ? getLeafNodes(ctx.expression[0].children) : null,
           blockCst: ctx.hasOwnProperty('statement') ? ctx.statement[0] : null,
           location: { start: ctx.statement[0].location.startOffset, end: ctx.statement[0].location.endOffset }
       };
@@ -89,7 +89,7 @@ class IfStmtCollector extends BaseJavaCstVisitorWithDefaults {
   ifStatement(ctx) {
       const ifStmt = {
           type: 'ifStmt',
-          expr: ctx.hasOwnProperty('expression') ? getLeafNodes(ctx.expression[0].children) : null,
+          terminate: ctx.hasOwnProperty('expression') ? getLeafNodes(ctx.expression[0].children) : null,
           blockCst: ctx.hasOwnProperty('statement') ? ctx.statement[0] : null
       };
       this.loops.push(ifStmt);

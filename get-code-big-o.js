@@ -3,7 +3,8 @@ const { parseCodeToTree }  = require("./parse-code");
 const { mapTree }  = require("./util");
 
 function getSourceCodeBigO(input) {
-  javaCode = 'public class DummyClass{ public static void main(String args[]) {' + input + '}}';
+  javaCode = input.replace(/\n/g, " ");
+  javaCode = 'public class DummyClass { public static void main(String args[]) {' + javaCode + '}}';
 
   const stmtTree = parseCodeToTree(javaCode);
 

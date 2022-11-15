@@ -30,7 +30,7 @@ test('SquaredNested', () => {
             .toBe("O(N^2)");
 })
 
-test.ignore('LinearDecrement', () => {
+test.skip('LinearDecrement', () => {
     expect(
         getSourceCodeBigO(
             `
@@ -43,7 +43,7 @@ test.ignore('LinearDecrement', () => {
             .toBe("O(N)");
 })
 
-test.ignore('ConstantTimeDecrement', () => {
+test.skip('ConstantTimeDecrement', () => {
     expect(
         getSourceCodeBigO(
             `
@@ -56,7 +56,7 @@ test.ignore('ConstantTimeDecrement', () => {
             .toBe("O(1)");
 })
 
-test.ignore('ConstantTimeIncrement', () => {
+test.skip('ConstantTimeIncrement', () => {
     expect(
         getSourceCodeBigO(
             `

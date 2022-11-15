@@ -1,8 +1,12 @@
 const getSourceCodeBigO = require("./get-code-big-o");
 
+var javaCode = undefined;
+
 exports.handler = async (event) => {
     const json = JSON.parse(event.body);
     const input = json.code;
+    const result = getSourceCodeBigO(input);
+
     const response = {
         headers: { 
             'Access-Control-Allow-Origin': '*',
@@ -10,17 +14,20 @@ exports.handler = async (event) => {
             'Access-Control-Allow-Headers': 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With'
         },
         statusCode: 200,
-        body: JSON.stringify(getSourceCodeBigO(input))
+        body: JSON.stringify(result)
     };
+
     return response;
+
 };
 
 /* Uncomment Below for Testing */
 
 const input = `
-for (int i = n; i > 0; i--) {}
+int x = 0;
+while (x < n) {
+    x++;
+}
 `
-
-var javaCode = undefined;
 
 console.log(getSourceCodeBigO(input));
