@@ -1,5 +1,4 @@
-const { getForLoopBigO }  = require("./for-loops");
-const { getWhileLoopBigO } = require("./while-loops")
+const { getForLoopBigO, getWhileLoopBigO }  = require("./get-statement-big-o");
 const { parseCodeToTree }  = require("./parse-code");
 const { mapTree }  = require("./util");
 

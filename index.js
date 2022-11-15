@@ -1,4 +1,4 @@
-const getSourceCodeBigO = require('./analyze');
+const getSourceCodeBigO = require("./get-code-big-o");
 
 exports.handler = async (event) => {
     const json = JSON.parse(event.body);

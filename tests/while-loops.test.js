@@ -1,4 +1,4 @@
-const getSourceCodeBigO = require('../analyze');
+const getSourceCodeBigO = require("../get-code-big-o");
 
 test('WhileLoop1', () => {
     expect(
