@@ -12,6 +12,8 @@ function getSourceCodeBigO(input) {
   const res = findLargestBigO(stmtTree);
   if (res == 1)
     return "O(N)";
+  else if (res == 0)
+    return "O(1)";
   else
     return "O(N^" + res + ")";
 }

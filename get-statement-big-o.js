@@ -1,7 +1,7 @@
 function getForLoopBigO(stmt) {
     // Handle Error Cases
     if (stmt.init) {
-        if (!(stmt.init.length == 3 || stmt.init.length == 4)) 
+        if (!(stmt.init.length == 3 || stmt.init.length == 4))
             throw ("Only for loops with one initialized variable are supported");
         if (stmt.init.length == 4 && !isSupportedType(stmt.init[0])) throw ("Only for loop initializers with primitive whole number data types are supported");
     } else throw ("Only for loops with an initialized variable are supported");
@@ -80,12 +80,20 @@ function getForLoopBigO(stmt) {
 
 function getWhileLoopBigO(stmt) {
     whileLoop = javaCode.slice(stmt.location.start, stmt.location.end + 1);
-    let [{ Identifier: termOperand1 }, { Identifier: termOperand2 }, { BinaryOperator: termOperator }] = stmt.expr;
+
+    let termOperand1, termOperand2, termOperator;
+    [{ Identifier: termOperand1 }, { Identifier: termOperand2 }, { BinaryOperator: termOperator }] = stmt.expr;
+    if (!termOperand1)
+        [{ DecimalLiteral: termOperand1 }, ,] = stmt.expr;
+    if (!termOperand2)
+        [, { DecimalLiteral: termOperand2 },] = stmt.expr;
+    if (!(termOperand1 && termOperand2 && termOperator))
+        throw ("Unsupported while loop expression");
 
     if (termOperand1 != 'n' && termOperand2 != 'n') // TODO: If no n, find if n was assigned to variable used in terminator
         return 0;
 
-    // Moves n to rhs for normalized analysis 
+    // Moves n to rhs for normalized analysis
     if (termOperand1 == 'n') {
         termOperand1 = termOperand2;
         termOperand2 = 'n';
@@ -93,11 +101,14 @@ function getWhileLoopBigO(stmt) {
         else if (termOperator.includes('<')) termOperator = termOperator.replace('<', '>');
     }
 
-    // TODO: Check for more than just first match
-
-    if (whileLoop.match(buildRegex(termOperand1, '++'))) {
-        return 1;
+    if (termOperand2 == 'n' && termOperator.includes('<')) {
+        if (whileLoop.match(buildRegex(termOperand1, '++')))
+            return 1;
+        if (whileLoop.match(buildRegex(termOperand1, '--')))
+            return 0;
     }
+
+    // TODO: Add analysis for break statement
 }
 
 function buildRegex(variable, operator) {

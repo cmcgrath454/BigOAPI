@@ -1,6 +1,6 @@
 const getSourceCodeBigO = require("../get-code-big-o");
 
-test('WhileLoop1', () => {
+test('LinearIncrement', () => {
     expect(
         getSourceCodeBigO(
             `
@@ -13,7 +13,7 @@ test('WhileLoop1', () => {
             .toBe("O(N)");
 })
 
-test('WhileLoop2', () => {
+test('SquaredNested', () => {
     expect(
         getSourceCodeBigO(
             `
@@ -29,3 +29,43 @@ test('WhileLoop2', () => {
             ))
             .toBe("O(N^2)");
 })
+
+test.ignore('LinearDecrement', () => {
+    expect(
+        getSourceCodeBigO(
+            `
+            int x = n;
+            while (x > 0) {
+                x--;
+            }
+            `
+            ))
+            .toBe("O(N)");
+})
+
+test.ignore('ConstantTimeDecrement', () => {
+    expect(
+        getSourceCodeBigO(
+            `
+            int x = n;
+            while (x < n) {
+                x--;
+            }
+            `
+            ))
+            .toBe("O(1)");
+})
+
+test.ignore('ConstantTimeIncrement', () => {
+    expect(
+        getSourceCodeBigO(
+            `
+            int x = 0;
+            while (x > n) {
+                x++;
+            }
+            `
+            ))
+            .toBe("O(1)");
+})
+
