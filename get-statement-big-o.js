@@ -1,36 +1,21 @@
 const CONSTANT_TIME = {
     "n": 0,
-    "logn" : 0
+    "logn": 0
 }
 
 const LINEAR_TIME = {
     "n": 1,
-    "logn" : 0
+    "logn": 0
 }
 
 const LOG_TIME = {
     "n": 0,
-    "logn" : 1
+    "logn": 1
 }
 
 function getForLoopBigO(stmt) {
-    /* Handle possible error cases before analyzing */
-    if (stmt.init) {
-        if (!(stmt.init.length == 3 || stmt.init.length == 4))
-            throw ("Only for loops with one initialized variable are supported");
-        if (stmt.init.length == 4 && !isSupportedType(stmt.init[0]))
-            throw ("Only for loop initializers with primitive whole number data types are supported");
-    } else
-        throw ("Only for loops with an initialized variable are supported");
+    elementsAreSupported(stmt);
 
-    if (!stmt.terminate)
-        throw ("Only for loops with a boolean terminating expression are supported");
-
-    if (stmt.update) {
-        if (stmt.update.length < 2 || stmt.update.length > 5)
-            throw ("Only for loops with exactly one increment statement are supported");
-    } else
-        throw ("Only for loops with increment statement are supported");
 
     /* Destructure for loop element object arrays provided by parser  */
     if (stmt.init.length == 3) /* Initializer without declaration */
@@ -151,18 +136,21 @@ function buildRegex(variable, operator) {
     return new RegExp(findStr);
 }
 
-function isSupportedType(typeObject) {
-    let supportedTypes = ["byte", "int", "short", "long"];
+function elementsAreSupported(stmt) {
+    // TODO: Add in locations for text highlighting
+    if (stmt.type = "forLoop") {
+        if (!stmt.init || !stmt.terminate || !stmt.update)
+            return false;
 
-    /* TODO: Add support for floats
-    *  - Must add to all destructuring assignments first
-    *    before allowing as supportedType here 
-    * */
+        if (stmt.init.length > 4)
+            return false;
 
-    // Destructure typeObject
-    const [, type] = Object.entries(typeObject)[0];
+        if (isNaN(stmt.init[stmt.init.length - 1]))
+            return false;
 
-    return supportedTypes.includes(type);
+        if (stmt.update.length > 5)
+            return false;
+    }
 }
 
 module.exports = { getForLoopBigO, getWhileLoopBigO };
