@@ -1,3 +1,18 @@
+const CONSTANT_TIME = {
+    "n": 0,
+    "logn" : 0
+}
+
+const LINEAR_TIME = {
+    "n": 1,
+    "logn" : 0
+}
+
+const LOG_TIME = {
+    "n": 0,
+    "logn" : 1
+}
+
 function getForLoopBigO(stmt) {
     /* Handle possible error cases before analyzing */
     if (stmt.init) {
@@ -44,9 +59,9 @@ function getForLoopBigO(stmt) {
         throw ("Only shorthand assignment and unary expressions are supported in for loops"); // TODO: Add support
 
     /* Constant Time if n isn't considered in either terminator or initializer */
-    // TODO: Add case for when another variable is assigned n then used in for loop
+    // TODO: Add case for when n is assigned to another variable then used in for loop
     if (termOperand1 != 'n' && termOperand2 != 'n' && initVal != 'n')
-        return 0;
+        return CONSTANT_TIME;
 
     /* Move n to rhs for normalized analysis */
     if (termOperand1 == 'n') {
@@ -61,15 +76,15 @@ function getForLoopBigO(stmt) {
         case '++':
         case '+=':
             if (termOperator.includes('<') || termOperator.includes("!="))
-                return (1);
+                return LINEAR_TIME;
             else
-                return 0;
+                return CONSTANT_TIME;
         case '--':
         case '-=':
             if ((termOperator.includes('>') || termOperator.includes("!=")) && !isNaN(termOperand2))
-                return (1);
+                return LINEAR_TIME;
             else
-                return 0;
+                return CONSTANT_TIME;
         case '*=':
             throw ("Unsupported update operator");
         case '/=':
@@ -101,7 +116,7 @@ function getWhileLoopBigO(stmt) {
 
     // TODO: If no 'n' found, check if n was assigned to another variable in terminator before returning 0
     if (termOperand1 != 'n' && termOperand2 != 'n')
-        return 0;
+        return CONSTANT_TIME;
 
     /* Moves n to rhs for normalized analysis */
     if (termOperand1 == 'n') {
@@ -114,9 +129,9 @@ function getWhileLoopBigO(stmt) {
     /* Analyze Big-O */
     if (termOperand2 == 'n' && termOperator.includes('<')) {
         if (whileLoop.match(buildRegex(termOperand1, '++')))
-            return 1;
+            return LINEAR_TIME;
         if (whileLoop.match(buildRegex(termOperand1, '--')))
-            return 0;
+            return CONSTANT_TIME;
     }
 
     // TODO: Add analysis for break statement

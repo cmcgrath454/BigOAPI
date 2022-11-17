@@ -10,25 +10,21 @@ function getSourceCodeBigO(input) {
 
   mapTree(stmtTree, addStmtBigO);
 
-  const res = findLargestBigO(stmtTree);
-  if (res == 1)
-    return "O(N)";
-  else if (res == 0)
-    return "O(1)";
-  else
-    return "O(N^" + res + ")";
+  return findLargestBigO(stmtTree);
 }
 
 function findLargestBigO(tree) {
   bigOList = [];
-  mapTree(tree, bigOs);
-  return Math.max(...bigOList);
-}
+  mapTree(tree, stmt => {
+    bigOList.push(stmt.bigO);
+  });
 
-var bigOList;
-
-function bigOs(stmt) {
-  bigOList.push(stmt.bigO);
+  maxN = Math.max(...bigOList.map(bigO => bigO.n));
+  bigOList = bigOList.filter(bigO => bigO.n == maxN);
+  return bigOList.reduce( (prev, current) => {
+    return prev.logn > current.logn ? prev : current;
+  })
+  
 }
 
 function addStmtBigO(stmt) {
@@ -50,7 +46,10 @@ function addStmtBigO(stmt) {
       break;
   }
   if (stmt.parent != null) {
-    stmt.bigO = stmt.parent.bigO + bigO;
+    stmt.bigO = {
+      "n" : stmt.parent.bigO.n + bigO.n,
+      "logn": stmt.parent.bigO.logn + bigO.logn
+    }
   } else {
     stmt.bigO = bigO;
   }
