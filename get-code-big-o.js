@@ -10,7 +10,29 @@ function getSourceCodeBigO(input) {
 
   mapTree(stmtTree, addStmtBigO);
 
-  return findLargestBigO(stmtTree);
+  const result = findLargestBigO(stmtTree);
+  let bigOStr = "";
+
+  if (result.n == 0 && result.logn == 0)
+    return 'O(1)';
+
+  if (result.n > 0) {
+    let nStr = result.n > 1 ? `O(N^${result.n}` : 'O(N'
+    bigOStr += nStr;
+  } else {
+    bigOStr += 'O(';
+  }
+
+  if (result.logn > 0) {
+    if (result.n > 0)
+      bigOStr += ' * '
+    let logStr = result.logn > 1 ? `${result.logn}log(N` : 'log(N';
+    bigOStr += logStr;
+  }
+
+  bigOStr += ')';
+
+  return bigOStr;
 }
 
 function findLargestBigO(tree) {
