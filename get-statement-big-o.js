@@ -150,8 +150,6 @@ function getWhileLoopBigO(stmt) {
     /* TODO: Write methods that find the initializer and updater expressions 
      of variable found in the terminating expression */
 
-
-
      return analyzeBigO(initializer, updater, terminator);
 }
 
@@ -172,8 +170,10 @@ function buildRegex(variable, operator) {
 function elementsAreSupported(stmt) {
     // TODO: Add in locations for text highlighting
     if (stmt.type = "forLoop") {
-        if (!stmt.init || !stmt.terminate || !stmt.update)
+        if (!stmt.init || !stmt.terminate || !stmt.update) {
+            unsupported.push(stmt.locations.fullStmt);
             return false;
+        }
 
         if (stmt.init.length > 4)
             return false;

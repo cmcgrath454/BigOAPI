@@ -1,6 +1,7 @@
 const getSourceCodeBigO = require("./get-code-big-o");
 
 var javaCode = undefined;
+var unsupported = undefined;
 
 exports.handler = async (event) => {
     const json = JSON.parse(event.body);
@@ -14,7 +15,7 @@ exports.handler = async (event) => {
             'Access-Control-Allow-Headers': 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With'
         },
         statusCode: 200,
-        body: JSON.stringify(result)
+        body: result
     };
 
     return response;
@@ -24,9 +25,8 @@ exports.handler = async (event) => {
 /* Uncomment Below for Testing */
 
 const input = `
-int x = 0;
-while (x < n) {
-    x++;
+for (int i = n; i > 0; i--) {
+    for (int i = n; i > 0; i/=2) {}
 }
 `
 

@@ -6,6 +6,8 @@ function getSourceCodeBigO(input) {
   javaCode = input.replace(/\n/g, " ");
   javaCode = 'public class DummyClass { public static void main(String args[]) {' + javaCode + '}}';
 
+  unsupported = [];
+
   const stmtTree = parseCodeToTree(javaCode);
 
   mapTree(stmtTree, addStmtBigO);
@@ -32,7 +34,10 @@ function getSourceCodeBigO(input) {
 
   bigOStr += ')';
 
-  return bigOStr;
+  return {
+    result: bigOStr,
+    unsupported: unsupported
+  };
 }
 
 function findLargestBigO(tree) {

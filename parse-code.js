@@ -8,38 +8,37 @@ function parseCodeToTree(sourceCode) {
 function buildStmtTree(cst, parent = null) {
     const stmts = getStatements(cst);
     if (stmts.length == 0) return null;
-  
-    stmts.forEach((stmt, index) => {
-      stmts[index]['parent'] = parent;
-      stmts[index]['childStmts'] = [];
 
-      const childStmt = stmt.hasOwnProperty('blockCst') ? buildStmtTree(stmt.blockCst, stmt) : null;
-      
-      if (stmt.hasOwnProperty('blockCst')) {
-        buildStmtTree(stmt.blockCst, stmt);
-        if (childStmt != null && childStmt.length > 1) throw ('Too many items in child statement array'); // TODO: For dev purposes only, remove later
-        if (childStmt != null) stmts[index]['childStmts'].push(childStmt[0]);
-      }
+    stmts.forEach((stmt, index) => {
+        stmts[index]['parent'] = parent;
+        stmts[index]['childStmts'] = [];
+
+        const childStmt = stmt.hasOwnProperty('blockCst') ? buildStmtTree(stmt.blockCst, stmt) : null;
+
+        if (stmt.hasOwnProperty('blockCst')) {
+            buildStmtTree(stmt.blockCst, stmt);
+            if (childStmt != null) stmts[index]['childStmts'].push(childStmt[0]);
+        }
     })
 
     return stmts;
 }
 
 class StatementCollector extends BaseJavaCstVisitorWithDefaults {
-  constructor() {
-      super();
-      this.blocks = [];
-      this.validateVisitor();
-  }
+    constructor() {
+        super();
+        this.blocks = [];
+        this.validateVisitor();
+    }
 
-  statement(ctx) {
-      for (const stmt in ctx) {
-          if (stmt == 'statementWithoutTrailingSubstatement' || stmt == 'labeledStatement')
-              this.visit(ctx[stmt]);
-          else
-              this.blocks.push(ctx[stmt]);
-      }
-  }
+    statement(ctx) {
+        for (const stmt in ctx) {
+            if (stmt == 'statementWithoutTrailingSubstatement' || stmt == 'labeledStatement')
+                this.visit(ctx[stmt]);
+            else
+                this.blocks.push(ctx[stmt]);
+        }
+    }
 }
 
 class ForLoopCollector extends BaseJavaCstVisitorWithDefaults {
@@ -57,9 +56,10 @@ class ForLoopCollector extends BaseJavaCstVisitorWithDefaults {
             update: ctx.hasOwnProperty('forUpdate') ? getLeafNodes(ctx.forUpdate[0].children) : null,
             blockCst: ctx.hasOwnProperty('statement') ? ctx.statement[0] : null,
             locations: {
-                init: ctx.hasOwnProperty('forInit') ? ctx.forInit[0].location : null,
-                terminate: ctx.hasOwnProperty('expression') ? ctx.expression[0].location : null,
-                update: ctx.hasOwnProperty('forUpdate') ? ctx.forUpdate[0].location : null,
+                init: ctx.hasOwnProperty('forInit') ? { start: ctx.forInit[0].location.startOffset, end: ctx.forInit[0].location.endOffset } : null,
+                terminate: ctx.hasOwnProperty('expression') ? { start: ctx.expression[0].location.startOffset, end: ctx.expression[0].location.endOffset } : null,
+                update: ctx.hasOwnProperty('forUpdate') ? { start: ctx.forUpdate[0].location.startOffset, end: ctx.forUpdate[0].location.endOffset } : null,
+                fullStmt: { start: ctx.LBrace[0].startOffset, end: ctx.RBrace[0].endOffset }
             }
         };
         this.loops.push(forLoop);
@@ -67,106 +67,101 @@ class ForLoopCollector extends BaseJavaCstVisitorWithDefaults {
 }
 
 class WhileLoopCollector extends BaseJavaCstVisitorWithDefaults {
-  constructor() {
-      super();
-      this.loops = [];
-      this.validateVisitor();
-  }
+    constructor() {
+        super();
+        this.loops = [];
+        this.validateVisitor();
+    }
 
-  whileStatement(ctx) {
-      const whileLoop = {
-          type: 'whileLoop',
-          terminate: ctx.hasOwnProperty('expression') ? getLeafNodes(ctx.expression[0].children) : null,
-          blockCst: ctx.hasOwnProperty('statement') ? ctx.statement[0] : null,
-          location: { start: ctx.statement[0].location.startOffset, end: ctx.statement[0].location.endOffset }
-      };
-      this.loops.push(whileLoop);
-  }
+    whileStatement(ctx) {
+        const whileLoop = {
+            type: 'whileLoop',
+            terminate: ctx.hasOwnProperty('expression') ? getLeafNodes(ctx.expression[0].children) : null,
+            blockCst: ctx.hasOwnProperty('statement') ? ctx.statement[0] : null,
+            location: { start: ctx.statement[0].location.startOffset, end: ctx.statement[0].location.endOffset }
+        };
+        this.loops.push(whileLoop);
+    }
 }
 
 class IfStmtCollector extends BaseJavaCstVisitorWithDefaults {
-  constructor() {
-      super();
-      this.loops = [];
-      this.validateVisitor();
-  }
+    constructor() {
+        super();
+        this.loops = [];
+        this.validateVisitor();
+    }
 
-  ifStatement(ctx) {
-      const ifStmt = {
-          type: 'ifStmt',
-          terminate: ctx.hasOwnProperty('expression') ? getLeafNodes(ctx.expression[0].children) : null,
-          blockCst: ctx.hasOwnProperty('statement') ? ctx.statement[0] : null
-      };
-      this.loops.push(ifStmt);
-  }
+    ifStatement(ctx) {
+        const ifStmt = {
+            type: 'ifStmt',
+            terminate: ctx.hasOwnProperty('expression') ? getLeafNodes(ctx.expression[0].children) : null,
+            blockCst: ctx.hasOwnProperty('statement') ? ctx.statement[0] : null
+        };
+        this.loops.push(ifStmt);
+    }
 }
 
 function getStatements(cst) {
-  let stmtCollector = new StatementCollector();
-  stmtCollector.visit(cst);
-  let stmts = [...stmtCollector.blocks];
+    let stmtCollector = new StatementCollector();
+    stmtCollector.visit(cst);
+    let stmts = [...stmtCollector.blocks];
 
-  stmts.forEach((stmt, index) => {
-      if (stmt.length > 1) throw 'Statement has more than one element'; // TODO: For dev purposes only, remove later
-
-      switch (stmt[0].name) {
-          case 'forStatement':
-              stmts[index] = getForLoops(stmt);
-              break;
-          case 'ifStatement':
-              stmts[index] = getIfStmts(stmt);
-              break;
-          case 'whileStatement':
-              stmts[index] = getWhileLoops(stmt);
-              break;
-          default:
-              getStatements(stmts);
-      }
-  })
-  return stmts;
+    stmts.forEach((stmt, index) => {
+        switch (stmt[0].name) {
+            case 'forStatement':
+                stmts[index] = getForLoops(stmt);
+                break;
+            case 'ifStatement':
+                stmts[index] = getIfStmts(stmt);
+                break;
+            case 'whileStatement':
+                stmts[index] = getWhileLoops(stmt);
+                break;
+            default:
+                getStatements(stmts);
+        }
+    })
+    return stmts;
 }
 
 function getForLoops(cst) {
     let forLoopCollector = new ForLoopCollector();
     forLoopCollector.visit(cst);
-    if (forLoopCollector.loops > 0) throw ('Too many loops in forLoopCollector'); //For dev purposes only, delete later
     return forLoopCollector.loops[0];
 }
 
 function getWhileLoops(cst) {
-  let whileLoopCollector = new WhileLoopCollector();
-  whileLoopCollector.visit(cst);
-  if (whileLoopCollector.loops > 0) throw ('Too many loops in whileLoopCollector'); //For dev purposes only, delete later
-  return whileLoopCollector.loops[0];
+    let whileLoopCollector = new WhileLoopCollector();
+    whileLoopCollector.visit(cst);
+    return whileLoopCollector.loops[0];
 }
 
 function getIfStmts(cst) {
-  let ifStmtCollector = new IfStmtCollector();
-  ifStmtCollector.visit(cst);
-  if (ifStmtCollector.loops > 0) throw ('Too many loops in ifStmtCollector'); //For dev purposes only, delete later
-  return ifStmtCollector.loops[0];
+    let ifStmtCollector = new IfStmtCollector();
+    ifStmtCollector.visit(cst);
+    return ifStmtCollector.loops[0];
 }
 
 function getLeafNodes(ctx) {
-  const nodes = [];
-  recursiveGetLeafNodes(ctx, nodes);
-  return nodes;
+    const nodes = [];
+    recursiveGetLeafNodes(ctx, nodes);
+    return nodes;
 }
 
 function recursiveGetLeafNodes(ctx, arr) {
-  const props = Object.getOwnPropertyNames(ctx);
-  props.forEach(prop => {
-      ctx[prop].forEach(elem => {
-          const childCtx = elem.children;
-          if (childCtx != null) {
-              recursiveGetLeafNodes(childCtx, arr);
-          } else {
-              arr.push({
-                  [prop]: elem.image
-              });
-          }
-      });
-  })
+    const props = Object.getOwnPropertyNames(ctx);
+    props.forEach(prop => {
+        ctx[prop].forEach(elem => {
+            const childCtx = elem.children;
+            if (childCtx != null) {
+                recursiveGetLeafNodes(childCtx, arr);
+            } else {
+                arr.push({
+                    [prop]: elem.image
+                });
+            }
+        });
+    })
 }
 
 exports.parseCodeToTree = parseCodeToTree;
