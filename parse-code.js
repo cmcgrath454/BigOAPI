@@ -55,7 +55,12 @@ class ForLoopCollector extends BaseJavaCstVisitorWithDefaults {
             init: ctx.hasOwnProperty('forInit') ? getLeafNodes(ctx.forInit[0].children) : null,
             terminate: ctx.hasOwnProperty('expression') ? getLeafNodes(ctx.expression[0].children) : null,
             update: ctx.hasOwnProperty('forUpdate') ? getLeafNodes(ctx.forUpdate[0].children) : null,
-            blockCst: ctx.hasOwnProperty('statement') ? ctx.statement[0] : null
+            blockCst: ctx.hasOwnProperty('statement') ? ctx.statement[0] : null,
+            locations: {
+                init: ctx.hasOwnProperty('forInit') ? ctx.forInit[0].location : null,
+                terminate: ctx.hasOwnProperty('expression') ? ctx.expression[0].location : null,
+                update: ctx.hasOwnProperty('forUpdate') ? ctx.forUpdate[0].location : null,
+            }
         };
         this.loops.push(forLoop);
     }
