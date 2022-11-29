@@ -14,63 +14,68 @@ const LOG_TIME = {
 }
 
 function getForLoopBigO(stmt) {
+    let initializer = {}, updater = {}, terminator = {};
+
     if (!elementsAreSupported(stmt))
         return CONSTANT_TIME;
 
     /* Destructure for loop element object arrays provided by parser  */
     if (stmt.init.length == 3) /* Initializer without declaration */
         if (stmt.init[2].hasOwnProperty('DecimalLiteral'))
-            var [{ Identifier: initVar }, , { DecimalLiteral: initVal }] = stmt.init;
+            [{ Identifier: initializer.lhs }, , { DecimalLiteral: initializer.rhs }] = stmt.init;
         else if (stmt.init[2].hasOwnProperty('FloatLiteral'))
-            var [{ Identifier: initVar }, , { FloatLiteral: initVal }] = stmt.init;
+            [{ Identifier: initializer.lhs }, , { FloatLiteral: initializer.rhs }] = stmt.init;
         else
-            var [{ Identifier: initVar }, , { Identifier: initVal }] = stmt.init;
+            [{ Identifier: initializer.lhs }, , { Identifier: initializer.rhs }] = stmt.init;
     else /* Initializer with declaration */
         if (stmt.init[3].hasOwnProperty('DecimalLiteral'))
-            var [, { Identifier: initVar }, , { DecimalLiteral: initVal }] = stmt.init;
+            [, { Identifier: initializer.lhs }, , { DecimalLiteral: initializer.rhs }] = stmt.init;
         else if (stmt.init[2].hasOwnProperty('FloatLiteral'))
-            var [, { Identifier: initVar }, , { FloatLiteral: initVal }] = stmt.init;
+            [, { Identifier: initializer.lhs }, , { FloatLiteral: initializer.rhs }] = stmt.init;
         else
-            var [, { Identifier: initVar }, , { Identifier: initVal }] = stmt.init;
+            [, { Identifier: initializer.lhs }, , { Identifier: initializer.rhs }] = stmt.init;
 
-    let termOperand1, termOperand2, termOperator;
-    [{ Identifier: termOperand1 }, { Identifier: termOperand2 }, { BinaryOperator: termOperator }] = stmt.terminate;
-    if (!termOperand1)
-        [{ DecimalLiteral: termOperand1 }, ,] = stmt.terminate;
-    if (!termOperand2)
-        [, { DecimalLiteral: termOperand2 },] = stmt.terminate;
+    [{ Identifier: terminator.operand1 }, { Identifier: terminator.operand2 }, { BinaryOperator: terminator.operator }] = stmt.terminate;
+    if (!terminator.operand1)
+        [{ DecimalLiteral: terminator.operand1 }, ,] = stmt.terminate;
+    if (!terminator.operand2)
+        [, { DecimalLiteral: terminator.operand2 },] = stmt.terminate;
 
     if (stmt.update.length == 2)
-        var [{ Identifier: updateOperand1 }, { UnarySuffixOperator: updateOperator }] = stmt.update;
+        [{ Identifier: updater.operand1 }, { UnarySuffixOperator: updater.operator }] = stmt.update;
     if (stmt.update.length == 3)
-        var [{ Identifier: updateOperand1 }, { AssignmentOperator: updateOperator }, { DecimalLiteral: updateOperand2 }] = stmt.update;
+        [{ Identifier: updater.operand1 }, { AssignmentOperator: updater.operator }, { DecimalLiteral: updater.operand2 }] = stmt.update;
     if (stmt.update.length == 5)
         throw ("Only shorthand assignment and unary expressions are supported in for loops"); // TODO: Add support
 
-    if (isNaN(initVal)) {
-        if (!(initVal == 'n'))
+    return analyzeBigO(initializer, updater, terminator);
+}
+
+function analyzeBigO(initializer, updater, terminator) {
+    if (isNaN(initializer.rhs)) {
+        if (!(initializer.rhs == 'n'))
             return CONSTANT_TIME; /* Unsupported */
-        if (!(initVar == termOperand1 || initVar == termOperand2))
+        if (!(initializer.lhs == terminator.operand1 || initializer.lhs == terminator.operand2))
             return CONSTANT_TIME; /* Unsupported */
-        if (termOperand1 == 'n' || termOperand2 == 'n')
+        if (terminator.operand1 == 'n' || terminator.operand2 == 'n')
             return CONSTANT_TIME;
-        if (!(updateOperand1 == initVar))
+        if (!(updater.operand1 == initializer.lhs))
             return CONSTANT_TIME;
 
         /* Standardize Terminate Expression */
-        if (termOperand2 == 'n') {
-            termOperand2 = termOperand1;
-            termOperand1 = 'n';
-            if (termOperator.includes('>'))
-                termOperator = termOperator.replace('>', '<');
+        if (terminator.operand2 == 'n') {
+            terminator.operand2 = terminator.operand1;
+            terminator.operand1 = 'n';
+            if (terminator.operator.includes('>'))
+                terminator.operator = terminator.operator.replace('>', '<');
             else
-                termOperator.replace('<', '>');
+                terminator.operator.replace('<', '>');
         }
 
-        if (termOperator.includes('<'))
+        if (terminator.operator.includes('<'))
             return CONSTANT_TIME;
 
-        switch (updateOperator) { 
+        switch (updater.operator) { 
             case '++':
             case '+':
                 return CONSTANT_TIME;
@@ -87,26 +92,26 @@ function getForLoopBigO(stmt) {
                 throw ("Unexpected case"); 
         }
     } else {
-        if (!(termOperand1 == 'n' || termOperand2 == 'n'))
+        if (!(terminator.operand1 == 'n' || terminator.operand2 == 'n'))
             return CONSTANT_TIME;
-        if (!((termOperand1 == initVar || termOperand2 == initVar) && updateOperand1 == initVar))
+        if (!((terminator.operand1 == initializer.lhs || terminator.operand2 == initializer.lhs) && updater.operand1 == initializer.lhs))
             return CONSTANT_TIME;
 
         // TODO: Abstract similar occurences into function
-        if (termOperand1 == 'n') {
-            termOperand1 = termOperand2;
-            termOperand2 = 'n';
-            if (termOperator.includes('>'))
-                termOperator = termOperator.replace('>', '<');
+        if (terminator.operand1 == 'n') {
+            terminator.operand1 = terminator.operand2;
+            terminator.operand2 = 'n';
+            if (terminator.operator.includes('>'))
+                terminator.operator = terminator.operator.replace('>', '<');
             else
-                termOperator.replace('<', '>');
+                terminator.operator.replace('<', '>');
         }
 
-        if (termOperator.includes('>')) {
+        if (terminator.operator.includes('>')) {
             return CONSTANT_TIME;
         }
 
-        switch (updateOperator) {
+        switch (updater.operator) {
             case '++':
             case '+':
                 return LINEAR_TIME;
@@ -123,83 +128,31 @@ function getForLoopBigO(stmt) {
                 throw ("Unexpected case");  
         }
     }
-
-    /* Constant Time if n isn't considered in either terminator or initializer */
-    // TODO: Add case for when n is assigned to another variable then used in for loop
-    if (termOperand1 != 'n' && termOperand2 != 'n' && initVal != 'n')
-        return CONSTANT_TIME;
-
-    /* Move n to rhs for normalized analysis */
-    if (termOperand1 == 'n') {
-        termOperand1 = termOperand2;
-        termOperand2 = 'n';
-        if (termOperator.includes('>')) termOperator = termOperator.replace('>', '<');
-        else if (termOperator.includes('<')) termOperator = termOperator.replace('<', '>');
-    }
-
-    /* Analyze Big O */
-    switch (updateOperator) {
-        case '++':
-        case '+=':
-            if (termOperator.includes('<') || termOperator.includes("!="))
-                return LINEAR_TIME;
-            else
-                return CONSTANT_TIME;
-        case '--':
-        case '-=':
-            if ((termOperator.includes('>') || termOperator.includes("!=")) && !isis(termOperand2))
-                return LINEAR_TIME;
-            else
-                return CONSTANT_TIME;
-        case '*=':
-            throw ("Unsupported update operator");
-        case '/=':
-            throw ("Unsupported update operator");
-        case '%=':
-            throw ("Unsupported update operator");
-        default:
-            throw ("Update operator unsupported" + updateOperator);
-    }
 }
 
 function getWhileLoopBigO(stmt) {
-    const userInputStartIndex = 67; /* Index where added class declarations end */
+    let initializer = {}, updater = {}, terminator = {};
+    const userInputStartIndex = 67; /* Index where user code starts (omits class name) */
     whileLoop = javaCode.slice(stmt.location.start, stmt.location.end + 1);
     beforeWhileLoop = javaCode.slice(userInputStartIndex, stmt.location.start);
 
     /* Destructure while loop elements from parser */
-    let termOperand1, termOperand2, termOperator;
-    [{ Identifier: termOperand1 }, { Identifier: termOperand2 }, { BinaryOperator: termOperator }] = stmt.terminate;
-    if (!termOperand1)
-        [{ DecimalLiteral: termOperand1 }, ,] = stmt.terminate;
-    if (!termOperand2)
-        [, { DecimalLiteral: termOperand2 },] = stmt.terminate;
+    [{ Identifier: terminator.operand1 }, { Identifier: terminator.operand2 }, { BinaryOperator: terminator.operator }] = stmt.terminate;
+    if (!terminator.operand1)
+        [{ DecimalLiteral: terminator.operand1 }, ,] = stmt.terminate;
+    if (!terminator.operand2)
+        [, { DecimalLiteral: terminator.operand2 },] = stmt.terminate;
 
-    /* If terminator elements don't fit in destructure assignments, case not supported */
-    if (!(termOperand1 && termOperand2 && termOperator))
-        throw ("Unsupported while loop expression");
+    /* TODO: Write methods that validate that the while loop elements are supported before analyzing */
+    if (!(terminator.operand1 && terminator.operand2 && terminator.operator))
+        
 
-    // TODO: If no 'n' found, check if n was assigned to another variable in terminator before returning 0
-    if (termOperand1 != 'n' && termOperand2 != 'n')
-        return CONSTANT_TIME;
+    /* TODO: Write methods that find the initializer and updater expressions 
+     of variable found in the terminating expression */
 
-    /* Moves n to rhs for normalized analysis */
-    if (termOperand1 == 'n') {
-        termOperand1 = termOperand2;
-        termOperand2 = 'n';
-        if (termOperator.includes('>')) termOperator = termOperator.replace('>', '<');
-        else if (termOperator.includes('<')) termOperator = termOperator.replace('<', '>');
-    }
 
-    /* Analyze Big-O */
-    if (termOperand2 == 'n' && termOperator.includes('<')) {
-        if (whileLoop.match(buildRegex(termOperand1, '++')))
-            return LINEAR_TIME;
-        if (whileLoop.match(buildRegex(termOperand1, '--')))
-            return CONSTANT_TIME;
-    }
 
-    // TODO: Add analysis for break statement
+     return analyzeBigO(initializer, updater, terminator);
 }
 
 function buildRegex(variable, operator) {
@@ -227,7 +180,7 @@ function elementsAreSupported(stmt) {
 
         const numPropName = Object.getOwnPropertyNames(stmt.init[stmt.init.length - 1])[0];
 
-        if (isNaN(stmt.init[stmt.init.length - 1][numPropName]))
+        if (isNaN(stmt.init[stmt.init.length - 1][numPropName]) && stmt.init[stmt.init.length - 1][numPropName] != 'n')
             return false;
 
         if (stmt.terminate[2].BinaryOperator == "==" || stmt.terminate[2].BinaryOperator == "!=")
