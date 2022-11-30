@@ -15,8 +15,10 @@ exports.handler = async (event) => {
             'Access-Control-Allow-Headers': 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With'
         },
         statusCode: 200,
-        body: result
+        body: JSON.stringify(result)
     };
+
+    console.log(JSON.stringify(response));
 
     return response;
 
@@ -24,10 +26,10 @@ exports.handler = async (event) => {
 
 /* Uncomment Below for Testing */
 
-const input = `
-for (int i = n; i > 0; i--) {
-    for (int i = n; i > 0; i/=2) {}
-}
-`
+// const input = `
+// for (int i = n; i > 0;) {
+//     for (int i = n; i > 0; i++) {}
+// }
+// `
 
-console.log(getSourceCodeBigO(input));
+// console.log(getSourceCodeBigO(input));
