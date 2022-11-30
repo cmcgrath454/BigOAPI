@@ -45,8 +45,6 @@ function getForLoopBigO(stmt) {
         [{ Identifier: updater.operand1 }, { UnarySuffixOperator: updater.operator }] = stmt.update;
     if (stmt.update.length == 3)
         [{ Identifier: updater.operand1 }, { AssignmentOperator: updater.operator }, { DecimalLiteral: updater.operand2 }] = stmt.update;
-    if (stmt.update.length == 5)
-        throw ("Only shorthand assignment and unary expressions are supported in for loops"); // TODO: Add support
 
     return analyzeBigO(initializer, updater, terminator);
 }
@@ -75,7 +73,7 @@ function analyzeBigO(initializer, updater, terminator) {
         if (terminator.operator.includes('<'))
             return CONSTANT_TIME;
 
-        switch (updater.operator) { 
+        switch (updater.operator) {
             case '++':
             case '+':
                 return CONSTANT_TIME;
@@ -89,7 +87,7 @@ function analyzeBigO(initializer, updater, terminator) {
             case '/':
                 return LOG_TIME;
             default:
-                throw ("Unexpected case"); 
+                throw ("Unexpected case");
         }
     } else {
         if (!(terminator.operand1 == 'n' || terminator.operand2 == 'n'))
@@ -123,9 +121,9 @@ function analyzeBigO(initializer, updater, terminator) {
                 return LOG_TIME;
             case '/=':
             case '/':
-                return CONSTANT_TIME;  
+                return CONSTANT_TIME;
             default:
-                throw ("Unexpected case");  
+                throw ("Unexpected case");
         }
     }
 }
@@ -145,12 +143,12 @@ function getWhileLoopBigO(stmt) {
 
     /* TODO: Write methods that validate that the while loop elements are supported before analyzing */
     if (!(terminator.operand1 && terminator.operand2 && terminator.operator))
-        
 
-    /* TODO: Write methods that find the initializer and updater expressions 
-     of variable found in the terminating expression */
 
-     return analyzeBigO(initializer, updater, terminator);
+        /* TODO: Write methods that find the initializer and updater expressions 
+         of variable found in the terminating expression */
+
+        return analyzeBigO(initializer, updater, terminator);
 }
 
 function buildRegex(variable, operator) {
@@ -175,27 +173,32 @@ function elementsAreSupported(stmt) {
             return false;
         }
 
-        if (stmt.init.length > 4)
+        if (stmt.init.length < 3 || stmt.init.length > 4) {
+            unsupported.push(stmt.locations.init);
             return false;
+        }
 
-        const numPropName = Object.getOwnPropertyNames(stmt.init[stmt.init.length - 1])[0];
+        const initValuePropName = Object.getOwnPropertyNames(stmt.init[stmt.init.length - 1])[0];
+        const initValue = stmt.init[stmt.init.length - 1][initValuePropName];
 
-        if (isNaN(stmt.init[stmt.init.length - 1][numPropName]) && stmt.init[stmt.init.length - 1][numPropName] != 'n')
+        if (isNaN(initValue) && initValue != 'n') {
+            unsupported.push(stmt.locations.init);
             return false;
+        }
 
-        if (stmt.terminate[2].BinaryOperator == "==" || stmt.terminate[2].BinaryOperator == "!=")
+        if (stmt.terminate.length != 3
+            || stmt.terminate[2].BinaryOperator == "=="
+            || stmt.terminate[2].BinaryOperator == "!=") {
+            unsupported.push(stmt.locations.terminate);
             return false;
+        }
 
-        if (stmt.update.length > 5)
-            return false;
 
-        if (stmt.update[1].AssignmentOperator && stmt.update[1].AssignmentOperator == "%=")
-            return false;
-
-        if (stmt.update.length > 3 && stmt.update[4].BinaryOperator && stmt.update[4].BinaryOperator == "%")
-            return false;
-
-        if (stmt.update[0].Identifier == 'n') {
+        if (stmt.update.length < 2 || stmt.update.length > 3
+            || (stmt.update[1].AssignmentOperator && stmt.update[1].AssignmentOperator == "%=")
+            || (stmt.update.length > 3 && stmt.update[4].BinaryOperator && stmt.update[4].BinaryOperator == "%")
+            || (stmt.update[0].Identifier == 'n')) {
+            unsupported.push(stmt.locations.update);
             return false;
         }
 
