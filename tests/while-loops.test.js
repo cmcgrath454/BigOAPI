@@ -1,22 +1,22 @@
 const getSourceCodeBigO = require("../get-code-big-o");
 
-test('LinearIncrement', () => {
-    expect(
-        getSourceCodeBigO(
-            `
+test("LinearIncrement", () => {
+	expect(
+		getSourceCodeBigO(
+			`
             int x = 0;
             while (x < n) {
                 x++;
             }
             `
-            ))
-            .toBe("O(N)");
-})
+		)
+	).toStrictEqual({ result: "O(N)", unsupported: [] });
+});
 
-test('SquaredNested', () => {
-    expect(
-        getSourceCodeBigO(
-            `
+test("SquaredNested", () => {
+	expect(
+		getSourceCodeBigO(
+			`
             int x = 0;
             while (x < n) {
                 x++;
@@ -26,46 +26,45 @@ test('SquaredNested', () => {
                 }
             }
             `
-            ))
-            .toBe("O(N^2)");
-})
+		)
+	).toBe("O(N^2)");
+});
 
-test.skip('LinearDecrement', () => {
-    expect(
-        getSourceCodeBigO(
-            `
+test.skip("LinearDecrement", () => {
+	expect(
+		getSourceCodeBigO(
+			`
             int x = n;
             while (x > 0) {
                 x--;
             }
             `
-            ))
-            .toBe("O(N)");
-})
+		)
+	).toBe("O(N)");
+});
 
-test.skip('ConstantTimeDecrement', () => {
-    expect(
-        getSourceCodeBigO(
-            `
+test.skip("ConstantTimeDecrement", () => {
+	expect(
+		getSourceCodeBigO(
+			`
             int x = n;
             while (x < n) {
                 x--;
             }
             `
-            ))
-            .toBe("O(1)");
-})
+		)
+	).toBe("O(1)");
+});
 
-test.skip('ConstantTimeIncrement', () => {
-    expect(
-        getSourceCodeBigO(
-            `
+test.skip("ConstantTimeIncrement", () => {
+	expect(
+		getSourceCodeBigO(
+			`
             int x = 0;
             while (x > n) {
                 x++;
             }
             `
-            ))
-            .toBe("O(1)");
-})
-
+		)
+	).toBe("O(1)");
+});
