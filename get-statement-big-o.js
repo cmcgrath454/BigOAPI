@@ -16,7 +16,7 @@ const LOG_TIME = {
 function getForLoopBigO(stmt) {
     let initializer = {}, updater = {}, terminator = {};
 
-    if (!elementsAreSupported(stmt))
+    if (!forLoopIsSupported(stmt))
         return CONSTANT_TIME;
 
     /* Destructure for loop element object arrays provided by parser  */
@@ -51,10 +51,8 @@ function getForLoopBigO(stmt) {
 
 function analyzeBigO(initializer, updater, terminator) {
     if (isNaN(initializer.rhs)) {
-        if (!(initializer.rhs == 'n'))
-            return CONSTANT_TIME; /* Unsupported */
         if (!(initializer.lhs == terminator.operand1 || initializer.lhs == terminator.operand2))
-            return CONSTANT_TIME; /* Unsupported */
+            return CONSTANT_TIME; /* TODO: Add unsupported location */
         if (terminator.operand1 == 'n' || terminator.operand2 == 'n')
             return CONSTANT_TIME;
         if (!(updater.operand1 == initializer.lhs))
@@ -76,9 +74,11 @@ function analyzeBigO(initializer, updater, terminator) {
         switch (updater.operator) {
             case '++':
             case '+':
+            case '+=':
                 return CONSTANT_TIME;
             case '--':
             case '-':
+            case '-=':
                 return LINEAR_TIME;
             case '*=':
             case '*':
@@ -111,10 +111,12 @@ function analyzeBigO(initializer, updater, terminator) {
 
         switch (updater.operator) {
             case '++':
+            case '+=':
             case '+':
                 return LINEAR_TIME;
             case '--':
             case '-':
+            case '-=':
                 return CONSTANT_TIME;
             case '*=':
             case '*':
@@ -130,9 +132,6 @@ function analyzeBigO(initializer, updater, terminator) {
 
 function getWhileLoopBigO(stmt) {
     let initializer = {}, updater = {}, terminator = {};
-    const userInputStartIndex = 67; /* Index where user code starts (omits class name) */
-    whileLoop = javaCode.slice(stmt.location.start, stmt.location.end + 1);
-    beforeWhileLoop = javaCode.slice(userInputStartIndex, stmt.location.start);
 
     /* Destructure while loop elements from parser */
     [{ Identifier: terminator.operand1 }, { Identifier: terminator.operand2 }, { BinaryOperator: terminator.operator }] = stmt.terminate;
@@ -141,31 +140,51 @@ function getWhileLoopBigO(stmt) {
     if (!terminator.operand2)
         [, { DecimalLiteral: terminator.operand2 },] = stmt.terminate;
 
-    /* TODO: Write methods that validate that the while loop elements are supported before analyzing */
-    if (!(terminator.operand1 && terminator.operand2 && terminator.operator))
-
-
-        /* TODO: Write methods that find the initializer and updater expressions 
-         of variable found in the terminating expression */
-
-        return analyzeBigO(initializer, updater, terminator);
-}
-
-function buildRegex(variable, operator) {
-    let findStr = variable;
-
-    switch (operator) {
-        case '++':
-            findStr += '\\W*\\+\\+\\W*';
-            break;
+    if (!(terminator.operand1 && terminator.operand2 && terminator.operator)
+        || terminator.operator == "=="
+        || terminator.operator == "!=") {
+        unsupported.push(stmt.location);
+        return CONSTANT_TIME;
     }
-    // TODO: Build out all possible operators
 
-    findStr += ';'
-    return new RegExp(findStr);
+    const userInputStartIndex = 67; /* Index where user code starts (omits Java class name) */
+    whileLoop = javaCode.slice(stmt.location.start, stmt.location.end + 1);
+    beforeWhileLoop = javaCode.slice(userInputStartIndex, stmt.location.start);
+
+    /* TODO: Write methods that find the initializer and updater expressions 
+     of variable found in the terminating expression */
+
+    if (terminator.operand1 == 'n') {
+        terminator.operand1 = terminator.operand2;
+        terminator.operand2 = 'n';
+        if (terminator.operator.includes('>'))
+            terminator.operator = terminator.operator.replace('>', '<');
+        else
+            terminator.operator.replace('<', '>');
+    }
+
+    initializer.lhs = terminator.operand1;
+
+    const initRegex = new RegExp("\\S*\\s" + initializer.lhs + "\\s*=\\s*(\\S+);", "g");
+    const init = initRegex.exec(beforeWhileLoop);
+    initializer.rhs = init[1];
+
+    updater.operand1 = terminator.operand1;
+    const incrementRegex = new RegExp(updater.operand1 + "\\s*(\\+\\+|--)\\s*");
+    let update = incrementRegex.exec(whileLoop);
+
+    if (!update) {
+        const updateRegex = new RegExp(updater.operand1 + "\\s*([-+*\\/%]\\s*=)\\s*(\\S+)");
+        update = updateRegex.exec(whileLoop);
+        updater.operand2 = update[2];
+    }
+
+    updater.operator = update[1];
+
+    return analyzeBigO(initializer, updater, terminator);
 }
 
-function elementsAreSupported(stmt) {
+function forLoopIsSupported(stmt) {
     // TODO: Add in locations for text highlighting
     if (stmt.type = "forLoop") {
         if (!stmt.init || !stmt.terminate || !stmt.update) {
@@ -205,5 +224,6 @@ function elementsAreSupported(stmt) {
         return true;
     }
 }
+
 
 module.exports = { getForLoopBigO, getWhileLoopBigO };

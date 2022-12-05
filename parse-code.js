@@ -78,7 +78,9 @@ class WhileLoopCollector extends BaseJavaCstVisitorWithDefaults {
             type: 'whileLoop',
             terminate: ctx.hasOwnProperty('expression') ? getLeafNodes(ctx.expression[0].children) : null,
             blockCst: ctx.hasOwnProperty('statement') ? ctx.statement[0] : null,
-            location: { start: ctx.statement[0].location.startOffset, end: ctx.statement[0].location.endOffset }
+            location: { 
+                start: ctx.expression[0].location.startOffset, end: ctx.statement[0].location.endOffset
+            }
         };
         this.loops.push(whileLoop);
     }
