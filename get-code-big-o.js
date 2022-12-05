@@ -1,6 +1,6 @@
-const { getForLoopBigO, getWhileLoopBigO }  = require("./get-statement-big-o");
-const { parseCodeToTree }  = require("./parse-code");
-const { mapTree }  = require("./util");
+const { getForLoopBigO, getWhileLoopBigO } = require("./get-statement-big-o");
+const { parseCodeToTree } = require("./parse-code");
+const { mapTree } = require("./util");
 
 function getSourceCodeBigO(input) {
   javaCode = input.replace(/\n/g, " ");
@@ -25,16 +25,17 @@ function getSourceCodeBigO(input) {
     } else {
       bigOStr += 'O(';
     }
-  
+
     if (result.logn > 0) {
       if (result.n > 0)
         bigOStr += ' * '
       let logStr = result.logn > 1 ? `${result.logn}log(N)` : 'log(N)';
       bigOStr += logStr;
     }
+    bigOStr += ')';
   }
 
-  bigOStr += ')';
+
 
   return {
     result: bigOStr,
@@ -50,10 +51,10 @@ function findLargestBigO(tree) {
 
   maxN = Math.max(...bigOList.map(bigO => bigO.n));
   bigOList = bigOList.filter(bigO => bigO.n == maxN);
-  return bigOList.reduce( (prev, current) => {
+  return bigOList.reduce((prev, current) => {
     return prev.logn > current.logn ? prev : current;
   })
-  
+
 }
 
 function addStmtBigO(stmt) {
@@ -76,7 +77,7 @@ function addStmtBigO(stmt) {
   }
   if (stmt.parent != null) {
     stmt.bigO = {
-      "n" : stmt.parent.bigO.n + bigO.n,
+      "n": stmt.parent.bigO.n + bigO.n,
       "logn": stmt.parent.bigO.logn + bigO.logn
     }
   } else {
