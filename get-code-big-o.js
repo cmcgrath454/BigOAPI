@@ -35,8 +35,6 @@ function getSourceCodeBigO(input) {
     bigOStr += ')';
   }
 
-
-
   return {
     result: bigOStr,
     unsupported: unsupported
@@ -58,7 +56,7 @@ function findLargestBigO(tree) {
 }
 
 function addStmtBigO(stmt) {
-  let bigO = 0;
+  let bigO;
   switch (stmt.type) {
     case 'forLoop':
       bigO = getForLoopBigO(stmt);
@@ -66,15 +64,14 @@ function addStmtBigO(stmt) {
     case 'whileLoop':
       bigO = getWhileLoopBigO(stmt);
       break;
-    case 'ifStmt':
-      bigO = 0;
-      // TODO: Add BigO Function
-      break;
     default:
-      bigO = 0;
-      // TODO: Throw error?
+      bigO = {
+        "n": 0,
+        "logn": 0
+      };
       break;
   }
+
   if (stmt.parent != null) {
     stmt.bigO = {
       "n": stmt.parent.bigO.n + bigO.n,
@@ -83,6 +80,7 @@ function addStmtBigO(stmt) {
   } else {
     stmt.bigO = bigO;
   }
+
 }
 
 module.exports = getSourceCodeBigO;
