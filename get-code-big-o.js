@@ -2,6 +2,14 @@ const { getForLoopBigO, getWhileLoopBigO } = require("./get-statement-big-o");
 const { parseCodeToTree } = require("./parse-code");
 const { mapTree } = require("./util");
 
+/**
+ * This function handles the control flow of getting a source code snippet's 
+ * Big O by calling other functions to analyze the runtime complexity.
+ * @param {String} input - Java code to analyze
+ * @returns Object that includes the locations of any unsupported code and the
+ * Big O notation
+ */
+
 function getSourceCodeBigO(input) {
   javaCode = input.replace(/\n/g, " ");
   javaCode = 'public class DummyClass { public static void main(String args[]) {' + javaCode + '}}';
@@ -27,8 +35,6 @@ function getSourceCodeBigO(input) {
     }
 
     if (result.logn > 0) {
-      if (result.n > 0)
-        bigOStr += ' * '
       let logStr = result.logn > 1 ? `log(N)^${result.logn}` : 'log(N)';
       bigOStr += logStr;
     }
@@ -41,6 +47,13 @@ function getSourceCodeBigO(input) {
   };
 }
 
+/**
+ * This function is used to map through the tree and gather all the Big O
+ * notations of each statement. Then, it finds the largest resulting Big O
+ * which is included in the result.
+ * @param {Object} tree Object tree of statements with their Big O notations
+ * @returns Object that represents the maximum Big O notation
+ */
 function findLargestBigO(tree) {
   bigOList = [];
   mapTree(tree, stmt => {
@@ -55,6 +68,13 @@ function findLargestBigO(tree) {
 
 }
 
+/**
+ * This function takes a statement and calls the corresponding analysis
+ * function to get the statement's Big O notation. It then aggregates that
+ * with it's parent statement's Big O (if any) to find the Big O of the
+ * statement and add it to the statement object.
+ * @param {Object} stmt A statement object such as a for loop or while loop
+ */
 function addStmtBigO(stmt) {
   let bigO;
   switch (stmt.type) {
@@ -80,7 +100,6 @@ function addStmtBigO(stmt) {
   } else {
     stmt.bigO = bigO;
   }
-
 }
 
 module.exports = getSourceCodeBigO;
