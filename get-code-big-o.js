@@ -29,7 +29,7 @@ function getSourceCodeBigO(input) {
     if (result.logn > 0) {
       if (result.n > 0)
         bigOStr += ' * '
-      let logStr = result.logn > 1 ? `${result.logn}log(N)` : 'log(N)';
+      let logStr = result.logn > 1 ? `log(N)^${result.logn}` : 'log(N)';
       bigOStr += logStr;
     }
     bigOStr += ')';

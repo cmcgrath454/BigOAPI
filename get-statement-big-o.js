@@ -66,9 +66,9 @@ function getWhileLoopBigO(stmt) {
         return CONSTANT_TIME;
     }
 
-    const userInputStartIndex = 67; /* Index where user code starts (omits Java class name) */
-    whileLoop = javaCode.slice(stmt.location.start, stmt.location.end + 1);
-    beforeWhileLoop = javaCode.slice(userInputStartIndex, stmt.location.start);
+    javaCodeWithoutClassDecl = javaCode.slice(67,);
+    whileLoop = javaCodeWithoutClassDecl.slice(stmt.location.start, stmt.location.end + 1);
+    beforeWhileLoop = javaCodeWithoutClassDecl.slice(0, stmt.location.start);
 
     if (terminator.operand1 == 'n') {
         terminator.operand1 = terminator.operand2;
@@ -199,12 +199,12 @@ function analyzeBigO(initializer, updater, terminator) {
 function forLoopIsSupported(stmt) {
     if (stmt.type = "forLoop") {
         if (!stmt.init || !stmt.terminate || !stmt.update) {
-            unsupported.push(stmt.locations.fullStmt);
+            unsupported.push(stmt.location);
             return false;
         }
 
         if (stmt.init.length < 3 || stmt.init.length > 4) {
-            unsupported.push(stmt.locations.init);
+            unsupported.push(stmt.location);
             return false;
         }
 
@@ -212,14 +212,14 @@ function forLoopIsSupported(stmt) {
         const initValue = stmt.init[stmt.init.length - 1][initValuePropName];
 
         if (isNaN(initValue) && initValue != 'n') {
-            unsupported.push(stmt.locations.init);
+            unsupported.push(stmt.locations);
             return false;
         }
 
         if (stmt.terminate.length != 3
             || stmt.terminate[2].BinaryOperator == "=="
             || stmt.terminate[2].BinaryOperator == "!=") {
-            unsupported.push(stmt.locations.terminate);
+            unsupported.push(stmt.locations);
             return false;
         }
 
@@ -228,7 +228,7 @@ function forLoopIsSupported(stmt) {
             || (stmt.update[1].AssignmentOperator && stmt.update[1].AssignmentOperator == "%=")
             || (stmt.update.length > 3 && stmt.update[4].BinaryOperator && stmt.update[4].BinaryOperator == "%")
             || (stmt.update[0].Identifier == 'n')) {
-            unsupported.push(stmt.locations.update);
+            unsupported.push(stmt.locations);
             return false;
         }
 
