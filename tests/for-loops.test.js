@@ -73,5 +73,5 @@ test("ForLoop6", () => {
             }
             `
 		)
-	).toStrictEqual({ result: "O(N * log(N))", unsupported: [] });
+	).toStrictEqual({ result: "O(Nlog(N))", unsupported: [] });
 });
