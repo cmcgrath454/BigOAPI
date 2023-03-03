@@ -8,22 +8,34 @@ var unsupported = undefined;
  * @param {*} event - The API call event details (handled by AWS)
  */
 exports.handler = async (event) => {
-    const json = JSON.parse(event.body);
-    const input = json.code;
-    const result = getSourceCodeBigO(input);
+    let response = {}
+    try {
+        const result = getSourceCodeBigO(event.body);
+        response = {
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With',
+                'Access-Control-Allow-Credentials': true
 
-    const response = {
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, PUT, GET, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With'
-        },
-        statusCode: 200,
-        body: JSON.stringify(result)
-    };
+            },
+            statusCode: 201,
+            body: JSON.stringify(result)
+        };
+    } catch (e) {
+        console.error(e);
 
-    console.log(JSON.stringify(response));
+        response = {
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With',
+                'Access-Control-Allow-Credentials': true
 
+            },
+            statusCode: 422,
+            body: JSON.stringify(e, Object.getOwnPropertyNames(e))
+        }
+    }
     return response;
-
 };
