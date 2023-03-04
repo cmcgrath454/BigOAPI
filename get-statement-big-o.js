@@ -81,9 +81,9 @@ function getWhileLoopBigO(stmt) {
         return CONSTANT_TIME;
     }
 
-    javaCodeWithoutClassDecl = javaCode.slice(67,);
-    whileLoop = javaCodeWithoutClassDecl.slice(stmt.location.start, stmt.location.end + 1);
-    beforeWhileLoop = javaCodeWithoutClassDecl.slice(0, stmt.location.start);
+    let javaCodeWithoutClassDecl = javaCode.slice(67,);
+    let whileLoop = javaCodeWithoutClassDecl.slice(stmt.updaterSearchLocation.start, stmt.updaterSearchLocation.end);
+    let beforeWhileLoop = javaCodeWithoutClassDecl.slice(0, stmt.updaterSearchLocation.start);
 
     if (terminator.operand1 == 'n') {
         terminator.operand1 = terminator.operand2;

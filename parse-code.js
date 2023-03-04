@@ -109,7 +109,8 @@ class WhileLoopCollector extends BaseJavaCstVisitorWithDefaults {
             blockCst: ctx.hasOwnProperty('statement') ? ctx.statement[0] : null,
             location: {
                 start: ctx.While[0].startOffset - userInputStartIndex, end: ctx.RBrace[0].startOffset - userInputStartIndex
-            }
+            },
+            updaterSearchLocation: { start: ctx.While[0].startOffset - userInputStartIndex, end: ctx.statement[0].location.endOffset - userInputStartIndex }
         };
         this.loops.push(whileLoop);
     }

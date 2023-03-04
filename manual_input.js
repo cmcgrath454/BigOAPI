@@ -7,14 +7,14 @@ var unsupported = undefined;
 
 let input = `
 for (int i = 0; i < n; i++) {
-    for (int j = n; j >= 0; j = j + 2) {
-      int k = 0;
-      while (k < n) {
-        System.out.println("Hello World");
-        k = k + 1;
-      }
+  for (int j = n; j >= 0; j/=2) {
+    int k = 0;
+    while (k < n) {
+      k++;
     }
-  }`
+  }
+}
+  `
 
 
 const result = getSourceCodeBigO(input);
