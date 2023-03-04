@@ -83,7 +83,7 @@ class ForLoopCollector extends BaseJavaCstVisitorWithDefaults {
             update: ctx.hasOwnProperty('forUpdate') ? getLeafNodes(ctx.forUpdate[0].children) : null,
             blockCst: ctx.hasOwnProperty('statement') ? ctx.statement[0] : null,
             location: {
-                start: ctx.LBrace[0].startOffset - userInputStartIndex, end: ctx.RBrace[0].startOffset - userInputStartIndex
+                start: ctx.For[0].startOffset - userInputStartIndex, end: ctx.RBrace[0].startOffset - userInputStartIndex
             }
         };
         this.loops.push(forLoop);
@@ -108,7 +108,7 @@ class WhileLoopCollector extends BaseJavaCstVisitorWithDefaults {
             terminate: ctx.hasOwnProperty('expression') ? getLeafNodes(ctx.expression[0].children) : null,
             blockCst: ctx.hasOwnProperty('statement') ? ctx.statement[0] : null,
             location: {
-                start: ctx.expression[0].location.startOffset - userInputStartIndex, end: ctx.statement[0].location.endOffset - userInputStartIndex
+                start: ctx.While[0].startOffset - userInputStartIndex, end: ctx.RBrace[0].startOffset - userInputStartIndex
             }
         };
         this.loops.push(whileLoop);

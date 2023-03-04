@@ -240,14 +240,14 @@ function forLoopIsSupported(stmt) {
         const initValue = stmt.init[stmt.init.length - 1][initValuePropName];
 
         if (isNaN(initValue) && initValue != 'n') {
-            unsupported.push(stmt.locations);
+            unsupported.push(stmt.location);
             return false;
         }
 
         if (stmt.terminate.length != 3
             || stmt.terminate[2].BinaryOperator == "=="
             || stmt.terminate[2].BinaryOperator == "!=") {
-            unsupported.push(stmt.locations);
+            unsupported.push(stmt.location);
             return false;
         }
 
@@ -256,7 +256,7 @@ function forLoopIsSupported(stmt) {
             || (stmt.update[1].AssignmentOperator && stmt.update[1].AssignmentOperator == "%=")
             || (stmt.update.length > 3 && stmt.update[4].BinaryOperator && stmt.update[4].BinaryOperator == "%")
             || (stmt.update[0].Identifier == 'n')) {
-            unsupported.push(stmt.locations);
+            unsupported.push(stmt.location);
             return false;
         }
 
